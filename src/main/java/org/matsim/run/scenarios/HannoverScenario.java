@@ -7,6 +7,7 @@ import org.matsim.application.analysis.CheckPopulation;
 import org.matsim.application.analysis.traffic.LinkStats;
 import org.matsim.application.options.SampleOptions;
 import org.matsim.application.prepare.CreateLandUseShp;
+import org.matsim.application.prepare.counts.CreateCountsFromBAStData;
 import org.matsim.application.prepare.longDistanceFreightGER.tripExtraction.ExtractRelevantFreightTrips;
 import org.matsim.application.prepare.network.CleanNetwork;
 import org.matsim.application.prepare.network.CreateNetworkFromSumo;
@@ -23,12 +24,12 @@ import picocli.CommandLine;
 
 import java.util.List;
 
-@CommandLine.Command(header = ":: Open Template Scenario ::", version = HannoverScenario.VERSION, mixinStandardHelpOptions = true)
+@CommandLine.Command(header = ":: Open Hannover Scenario ::", version = HannoverScenario.VERSION, mixinStandardHelpOptions = true)
 @MATSimApplication.Prepare({
 		CreateNetworkFromSumo.class, CreateTransitScheduleFromGtfs.class, TrajectoryToPlans.class, GenerateShortDistanceTrips.class,
 		MergePopulations.class, ExtractRelevantFreightTrips.class, DownSamplePopulation.class, ExtractHomeCoordinates.class,
 		CreateLandUseShp.class, ResolveGridCoordinates.class, FixSubtourModes.class, AdjustActivityToLinkDistances.class, XYToLinks.class,
-		CleanNetwork.class
+		CleanNetwork.class, CreateCountsFromBAStData.class
 })
 @MATSimApplication.Analysis({
 		LinkStats.class, CheckPopulation.class
@@ -46,9 +47,8 @@ public class HannoverScenario extends MATSimApplication {
 		super(config);
 	}
 
-	// FIXME: update config path
 	public HannoverScenario() {
-		super(String.format("input/v%s/template-v%s-25pct.config.xml", VERSION, VERSION));
+		super(String.format("input/v%s/hannover-v%s-10pct.config.xml", VERSION, VERSION));
 	}
 
 	public static void main(String[] args) {

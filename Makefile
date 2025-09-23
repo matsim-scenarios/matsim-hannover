@@ -18,7 +18,7 @@ hannover := $(CURDIR)/../../public-svn/matsim/scenarios/countries/de/hannover/ha
 
 MEMORY ?= 50G
 #JAR := matsim-$(N)-*.jar
-JAR := matsim-hannover-1.0-0c272a7-dirty.jar
+JAR := matsim-hannover-1.0-31c7f9d-dirty.jar
 # snz data is from snz model 2025Q1. Thus, using germany map of similar time period.
 NETWORK := $(germany)/maps/germany-250127.osm.pbf
 
@@ -137,8 +137,8 @@ input/v1.0/prepare-100pct.plans.xml.gz:
 	$(sc) prepare trajectory-to-plans\
 	 --name prepare --sample-size 1 --output input/$V\
 	 --max-typical-duration 0\
-	 --population $(sharedOberlausitzDresden)/data/snz/20250123_Teilmodell_Hoyerswerda/Modell/population.xml.gz\
-	 --attributes $(sharedOberlausitzDresden)/data/snz/20250130_Teilmodell_Hoyerswerda/Modell/personAttributes.xml.gz
+	 --population $(shared)/data/snz/20250911_Teilmodell_Hannover/20250911_Teilmodell_Hannover/population.xml.gz\
+	 --attributes $(shared)/data/snz/20250911_Teilmodell_Hannover/20250911_Teilmodell_Hannover/personAttributes.xml.gz
 # resolve senozon aggregated grid coords (activities): distribute them based on landuse.shp
 	$(sc) prepare resolve-grid-coords $@\
 	 --input-crs $(CRS)\
@@ -146,18 +146,35 @@ input/v1.0/prepare-100pct.plans.xml.gz:
 	 --landuse $(germany)/landuse/landuse.shp\
 	 --output $@
 
+# TODO: here we might need an additional step: educ activities sollten auf echte Schulen gemappt sein
+# TODO: alte Agenten sollten auf Altersheime gemappt sein. stay home?!
+
+# TODO count-link zuordnung prüfen: richtung + art des links
+# create matsim counts file
+input/v1.0/hannover-v1.0-counts-bast.xml.gz: input/$V/$N-$V-network-with-pt.xml.gz
+	$(sc) prepare counts-from-bast\
+		--network $<\
+		--motorway-data $(germany)/bast-counts/2019/2019_A_S.zip\
+		--primary-data $(germany)/bast-counts/2019/2019_B_S.zip\
+		--station-data $(germany)/bast-counts/2019/Jawe2019.csv\
+		--year 2019\
+		--shp $(shared)/data/shp/network-area-utm32n.shp --shp-crs $(CRS)\
+		--output $@
+
  input/v1.0/dresden-v1.0-100pct.plans-initial.xml.gz: input/plans-longHaulFreight.xml.gz input/$V/prepare-100pct.plans.xml.gz
 # generate some short distance trips, which in senozon data generally are missing
+# we have to calculate the number of trips to add with python script create_ref.py
  # trip range 700m because:
  # when adding 1km trips (default value), too many trips of bin 1km-2km were also added.
  #the range value is beeline, so the trip distance (routed) often is higher than 1km
- #TODO: here, we need to differ between dresden and oberlausitz-dresden population for different calibs. One is based on Srv, the other on MiD.
-# MiD: --num-trips 210199
+# we only have MiD data for Hannover, so that's what we will calibrate against.
+#so far we do not have the MiD2023 data. using MiD 2018.
+#TODO: run python script to get num trips
 	$(sc) prepare generate-short-distance-trips\
    	 --population $(word 2,$^)\
    	 --input-crs $(CRS)\
 #   	 TODO: use dd shp, run python script for retrieving --num-trips
-  	 --shp $(shared)/data/oberlausitz-area/oberlausitz.shp --shp-crs $(CRS)\
+  	 --shp $(shared)/data/shp/network-area-utm32n.shp --shp-crs $(CRS)\
   	 --range 700\
     --num-trips 210199
 #	adapt coords of activities in the wider network such that they are closer to a link
@@ -185,17 +202,6 @@ input/v1.0/prepare-100pct.plans.xml.gz:
     	 --samples 0.25 0.1 0.01 0.001\
 
 #TODO: create facilities from plans and use as input
-
-# create matsim counts file
-input/v1.0/dresden-v1.0-counts-bast.xml.gz: input/$V/$N-$V-network-with-pt.xml.gz
-	$(sc) prepare counts-from-bast\
-		--network $<\
-		--motorway-data $(germany)/bast-counts/2019/2019_A_S.zip\
-		--primary-data $(germany)/bast-counts/2019/2019_B_S.zip\
-		--station-data $(germany)/bast-counts/2019/Jawe2019.csv\
-		--year 2019\
-		--shp $(shared)/data/oberlausitz-area/oberlausitz.shp --shp-crs $(CRS)\
-		--output $@
 
 # output of check-population was compared to initial output in matsim-oberlausitz-dresden scenario documentation, they align -sm0225
 check: input/$V/$N-$V-100pct.plans-initial.xml.gz
