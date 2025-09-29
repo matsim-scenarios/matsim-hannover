@@ -16,9 +16,9 @@ sharedOberlausitzDresden := $(CURDIR)/../../shared-svn/projects/matsim-oberlausi
 #sharedLausitz := $(CURDIR)/../../shared-svn/projects/DiTriMo
 hannover := $(CURDIR)/../../public-svn/matsim/scenarios/countries/de/hannover/hannover-$V/input/
 
-MEMORY ?= 50G
+MEMORY ?= 30G
 #JAR := matsim-$(N)-*.jar
-JAR := matsim-hannover-1.0-31c7f9d-dirty.jar
+JAR := matsim-hannover-1.0-056c08f-dirty.jar
 # snz data is from snz model 2025Q1. Thus, using germany map of similar time period.
 NETWORK := $(germany)/maps/germany-250127.osm.pbf
 
@@ -91,17 +91,17 @@ input/sumo.net.xml: ./input/network.osm
 #--remove-turn-restrictions used instead of new TurnRestrictionCleaner,
 # the cleaner needs more testing, as it destroys the bike network e.g.
 # TODO: talk to GR about freespeed factor/solutions to counts problem in RVR scenario.
-input/v1.0/dresden-v1.0-network.xml.gz: input/sumo.net.xml
+input/v1.0/dresden-v1.0-network5000.xml.gz: input/sumo.net.xml
 	echo input/$V/$N-$V-network.xml.gz
-	$(sc) prepare network-from-sumo $< --output $@ --free-speed-factor 0.7
-	$(sc) prepare clean-network $@ --output $@ --modes car --modes bike --modes ride --remove-turn-restrictions
-#	delete truck as allowed mode (not used), add longDistanceFreight as allowed mode, prepare network for emissions analysis
-	$(sc) prepare network\
-	 --network $@\
-	 --output $@
+	$(sc) prepare network-from-sumo $< --output $@ --free-speed-factor 0.7 --turn-restrictions IGNORE_TURN_RESTRICTIONS
+#	$(sc) prepare clean-network $@ --output $@ --modes car --modes bike --modes ride --remove-turn-restrictions
+##	delete truck as allowed mode (not used), add longDistanceFreight as allowed mode, prepare network for emissions analysis
+#	$(sc) prepare network\
+#	 --network $@\
+#	 --output $@
 
 # gtfs data from oberlausitz-dresden shared-svn dir is used because it is from the same time period as the senozon model and osm data.
-input/v1.0/dresden-v1.0-network-with-pt.xml.gz: input/$V/$N-$V-network.xml.gz
+input/v1.0/dresden-v1.0-network-with-pt.xml.gz: hannover-v1.0-network-prepared-cleaned.xml.gz
 	$(sc) prepare transit-from-gtfs --network $<\
 	 --output=input/$V\
 	 --name $N-$V --date "2025-02-09" --target-crs $(CRS) \
@@ -113,6 +113,17 @@ input/v1.0/dresden-v1.0-network-with-pt.xml.gz: input/$V/$N-$V-network.xml.gz
 	 --shp $(shared)/data/shp/network-area-utm32n.shp\
 	 --shp $(germany)/shp/germany-area.shp\
 
+ # TODO count-link zuordnung prüfen: richtung + art des links
+ # create matsim counts file
+ input/v1.0/hannover-v1.0-counts-bast.xml.gz: input/$V/$N-$V-network-with-pt.xml.gz
+	$(sc) prepare counts-from-bast\
+		--network $<\
+		--motorway-data $(germany)/bast-counts/2019/2019_A_S.zip\
+		--primary-data $(germany)/bast-counts/2019/2019_B_S.zip\
+		--station-data $(germany)/bast-counts/2019/Jawe2019.csv\
+		--year 2019\
+		--shp $(shared)/data/shp/network-area-utm32n.shp --shp-crs $(CRS)\
+		--output $@
 
 ########################### population creation ######################################################################################
 
@@ -139,56 +150,45 @@ input/v1.0/prepare-100pct.plans.xml.gz:
 	 --max-typical-duration 0\
 	 --population $(shared)/data/snz/20250911_Teilmodell_Hannover/20250911_Teilmodell_Hannover/population.xml.gz\
 	 --attributes $(shared)/data/snz/20250911_Teilmodell_Hannover/20250911_Teilmodell_Hannover/personAttributes.xml.gz
+ #	adapt coords of activities in the wider network such that they are closer to a link
+ # 	such that agents do not have to walk as far as before
+	$(sc) prepare adjust-activity-to-link-distances $@\
+	 --shp $(shared)/data/shp/network-area-utm32n.shp --shp-crs $(CRS)\
+	  --scale 1.15\
+	  --input-crs $(CRS)\
+	  --network input/$V/$N-$V-network.xml.gz\
+	  --output input/$V/prepare-100pct.plans-adj.xml.gz
 # resolve senozon aggregated grid coords (activities): distribute them based on landuse.shp
-	$(sc) prepare resolve-grid-coords $@\
+	$(sc) prepare resolve-grid-coords input/$V/prepare-100pct.plans-adj.xml.gz\
 	 --input-crs $(CRS)\
 	 --grid-resolution 300\
 	 --landuse $(germany)/landuse/landuse.shp\
 	 --output $@
+#	change modes in subtours with chain based AND non-chain based by choosing mode for subtour randomly
+	$(sc) prepare fix-subtour-modes --coord-dist 100 --input $@ --output $@
+#	set car availability for agents below 18 to false, standardize some person attrs, set home coords, set person income
+	$(sc) prepare population $@ --output $@
 
 # TODO: here we might need an additional step: educ activities sollten auf echte Schulen gemappt sein
 # TODO: alte Agenten sollten auf Altersheime gemappt sein. stay home?!
 
-# TODO count-link zuordnung prüfen: richtung + art des links
-# create matsim counts file
-input/v1.0/hannover-v1.0-counts-bast.xml.gz: input/$V/$N-$V-network-with-pt.xml.gz
-	$(sc) prepare counts-from-bast\
-		--network $<\
-		--motorway-data $(germany)/bast-counts/2019/2019_A_S.zip\
-		--primary-data $(germany)/bast-counts/2019/2019_B_S.zip\
-		--station-data $(germany)/bast-counts/2019/Jawe2019.csv\
-		--year 2019\
-		--shp $(shared)/data/shp/network-area-utm32n.shp --shp-crs $(CRS)\
-		--output $@
-
- input/v1.0/dresden-v1.0-100pct.plans-initial.xml.gz: input/plans-longHaulFreight.xml.gz input/$V/prepare-100pct.plans.xml.gz
+input/v1.0/prepare-100pct-with.trips-split-merged.plans.xml.gz: input/plans-longHaulFreight.xml.gz input/$V/prepare-100pct.plans.xml.gz
 # generate some short distance trips, which in senozon data generally are missing
-# we have to calculate the number of trips to add with python script create_ref.py
- # trip range 700m because:
- # when adding 1km trips (default value), too many trips of bin 1km-2km were also added.
- #the range value is beeline, so the trip distance (routed) often is higher than 1km
-# we only have MiD data for Hannover, so that's what we will calibrate against.
-#so far we do not have the MiD2023 data. using MiD 2018.
-#TODO: run python script to get num trips
+# 1) we have to calculate the number of trips to add with python script create_ref.py
+# for that it might be necessary to run split-activity-types-duration (see below) separately.
+# 2) trip range 700m because:
+# when adding 1km trips (default value), too many trips of bin 1km-2km were also added.
+# the range value is beeline, so the trip distance (routed) often is higher than 1km
+# 3) we only have MiD data for Hannover, so that's what we will calibrate against.
+# so far we do not have the MiD2023 data. using MiD 2017.
 	$(sc) prepare generate-short-distance-trips\
    	 --population $(word 2,$^)\
    	 --input-crs $(CRS)\
-#   	 TODO: use dd shp, run python script for retrieving --num-trips
   	 --shp $(shared)/data/shp/network-area-utm32n.shp --shp-crs $(CRS)\
   	 --range 700\
-    --num-trips 210199
-#	adapt coords of activities in the wider network such that they are closer to a link
-# 	such that agents do not have to walk as far as before
-	$(sc) prepare adjust-activity-to-link-distances input/$V/prepare-100pct.plans.xml.gz\
-	 --shp $(shared)/data/oberlausitz-area/oberlausitz.shp --shp-crs $(CRS)\
-     --scale 1.15\
-     --input-crs $(CRS)\
-     --network input/$V/$N-$V-network.xml.gz\
-     --output input/$V/prepare-100pct.plans-adj.xml.gz
-#	change modes in subtours with chain based AND non-chain based by choosing mode for subtour randomly
-	$(sc) prepare fix-subtour-modes --coord-dist 100 --input input/$V/prepare-100pct.plans-adj.xml.gz --output $@
-#	set car availability for agents below 18 to false, standardize some person attrs, set home coords, set person income
-	$(sc) prepare population $@ --output $@
+    --num-trips 256474\
+    --output $@
+#    this step *has to* be done after the generation of short distance trips.
 #	split activity types to type_duration for the scoring to take into account the typical duration
 	$(sc) prepare split-activity-types-duration\
 		--input $@\
@@ -196,18 +196,26 @@ input/v1.0/hannover-v1.0-counts-bast.xml.gz: input/$V/$N-$V-network-with-pt.xml.
 		--output $@
 #	merge person and freight pops
 	$(sc) prepare merge-populations $@ $< --output $@
-	$(sc) prepare adapt-freight-plans $@ --output $@
-	$(sc) prepare downsample-population $@\
-    	 --sample-size 1\
-    	 --samples 0.25 0.1 0.01 0.001\
 
-#TODO: create facilities from plans and use as input
+
+input/v1.0/hannover-v1.0-100pct.plans-initial.xml.gz: input/$V/prepare-100pct-with.trips-split-merged.plans.xml.gz input/$V/$N-$V-network-with-pt.xml.gz
+#	I am not sure if this is a good idea.
+#	TODO: discuss with KN
+	$(sc) prepare facilities\
+		--input-population $<\
+        --network $(word 2,$^)\
+        --output-population $@\
+        --output-facilities input/$V/$N-$V-activity-facilities.xml.gz
+	$(sc) prepare downsample-population $@\
+		 --sample-size 1\
+		 --samples 0.25 0.1 0.01 0.001\
 
 # output of check-population was compared to initial output in matsim-oberlausitz-dresden scenario documentation, they align -sm0225
+#TODO: check output of below. see scenario doc
 check: input/$V/$N-$V-100pct.plans-initial.xml.gz
 	$(sc) analysis check-population $<\
  	 --input-crs $(CRS)\
-	 --shp $(shared)/data/oberlausitz-area/oberlausitz.shp --shp-crs $(CRS)
+	 --shp $(shared)/data/shp/network-area-utm32n.shp --shp-crs $(CRS)
 
 # Aggregated target
 prepare: input/$V/$N-$V-100pct.plans-initial.xml.gz input/$V/$N-$V-network-with-pt.xml.gz
