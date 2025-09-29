@@ -56,7 +56,7 @@ if __name__ == "__main__":
 
     # this says 10pct, but is 100pct population, number of person: 1134991 (without freight agents)
     # same for trips
-    sim_persons = pd.read_csv("../../../output/output-oberlausitz-dresden-10pct/oberlausitz-dresden-10pct.output_persons.csv.gz",
+    sim_persons = pd.read_csv("Y:/net/ils/matsim-hannover/first-run-0it/output/output-hannover-10pct/hannover-10pct.output_persons.csv.gz",
                               delimiter=";", dtype={"person": "str"})
     sim_persons = sim_persons[sim_persons.subpopulation == "person"]
     sim_persons = gpd.GeoDataFrame(sim_persons,
@@ -64,7 +64,7 @@ if __name__ == "__main__":
 
     sim_persons = gpd.sjoin(sim_persons, region, how="inner", predicate="intersects")
 
-    sim = pd.read_csv("../../../output/output-oberlausitz-dresden-10pct/oberlausitz-dresden-10pct.output_trips.csv.gz",
+    sim = pd.read_csv("Y:/net/ils/matsim-hannover/first-run-0it/output/output-hannover-10pct/hannover-10pct.output_trips.csv.gz",
                       delimiter=";", dtype={"person": "str"})
 
     sim = pd.merge(sim, sim_persons, how="inner", left_on="person", right_on="person", validate="many_to_one")
