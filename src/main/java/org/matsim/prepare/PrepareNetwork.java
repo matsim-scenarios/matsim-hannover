@@ -10,12 +10,10 @@ import org.matsim.application.MATSimAppCommand;
 import org.matsim.contrib.emissions.HbefaRoadTypeMapping;
 import org.matsim.contrib.emissions.OsmHbefaMapping;
 import org.matsim.core.network.NetworkUtils;
-import org.matsim.core.network.algorithms.MultimodalNetworkCleaner;
+import org.matsim.utils.HannoverUtils;
 import picocli.CommandLine;
 
 import java.util.Set;
-
-import static org.matsim.utils.HannoverUtils.FREIGHT_MODES;
 
 @CommandLine.Command(
 		name = "network",
@@ -51,7 +49,7 @@ public class PrepareNetwork implements MATSimAppCommand {
 	/**
 	 * prepare link attributes for freight and truck as allowed modes together with car.
 	 */
-	public static void prepareFreightNetwork(Network network) {
+	public void prepareFreightNetwork(Network network) {
 		int linkCount = 0;
 
 		for (Link link : network.getLinks().values()) {
@@ -60,15 +58,14 @@ public class PrepareNetwork implements MATSimAppCommand {
 
 			// allow freight traffic together with cars
 			if (modes.contains(TransportMode.car)) {
-				modes.addAll(FREIGHT_MODES);
+				modes.addAll(HannoverUtils.getFreightModes());
 				linkCount++;
 			}
 			link.setAllowedModes(modes);
 		}
 
-		log.info("For {} links the freight modes {} have been added as allowed modes.", linkCount, FREIGHT_MODES);
-
-		new MultimodalNetworkCleaner(network).run(FREIGHT_MODES);
+		log.info("For {} links the freight modes {} have been added as allowed modes.", linkCount, HannoverUtils.getFreightModes());
+		NetworkUtils.cleanNetwork(network, HannoverUtils.getFreightModes());
 	}
 
 	/**
