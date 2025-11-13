@@ -13,6 +13,7 @@ CRS = "EPSG:25832"
 def person_filter(df):
     """ Filter person that are relevant for the calibration."""
 
+    # filter for persons in shp only.
     df = df.dropna(subset=["geom"])
     df = gpd.GeoDataFrame(df, geometry=gpd.GeoSeries.from_wkt(df.geom, crs="EPSG:4326").to_crs(CRS))
     df = gpd.sjoin(df, region, how="inner", predicate="intersects")
@@ -32,6 +33,7 @@ def trip_filter(df):
 if __name__ == "__main__":
 
     # Defines the study area
+    # this is needed because we need to filter the MiD (whole of germany) data for our study region.
     region = gpd.read_file("../../../../../shared-svn/projects/umex-hope/data/shp/network-area-utm32n.shp").to_crs(CRS)
 
     # This contains the path to the MiD 2017 data with the highest resolution
@@ -63,6 +65,7 @@ if __name__ == "__main__":
                                    geometry=gpd.points_from_xy(sim_persons.home_x, sim_persons.home_y)).set_crs(CRS)
 
     sim_persons = gpd.sjoin(sim_persons, region, how="inner", predicate="intersects")
+    print("Filtered residents of shp file: ", len(sim_persons))
 
     sim = pd.read_csv("Y:/net/ils/matsim-hannover/first-run-0it/output/output-hannover-10pct/hannover-10pct.output_trips.csv.gz",
                       delimiter=";", dtype={"person": "str"})
@@ -71,3 +74,4 @@ if __name__ == "__main__":
 
     share, add_trips = calc_needed_short_distance_trips(r.trips, sim, max_dist=700)
     print("Short distance trip missing: ", add_trips)
+    print(share)
