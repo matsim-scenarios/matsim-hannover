@@ -25,8 +25,6 @@ import org.matsim.prepare.PreparePopulation;
 import org.matsim.simwrapper.SimWrapperModule;
 import picocli.CommandLine;
 
-import java.util.List;
-
 @CommandLine.Command(header = ":: Open Hannover Scenario ::", version = HannoverScenario.VERSION, mixinStandardHelpOptions = true)
 @MATSimApplication.Prepare({
 		CreateNetworkFromSumo.class, CreateTransitScheduleFromGtfs.class, TrajectoryToPlans.class, GenerateShortDistanceTrips.class,

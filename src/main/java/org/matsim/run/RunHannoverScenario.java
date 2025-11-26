@@ -3,7 +3,10 @@ package org.matsim.run;
 import org.matsim.application.MATSimApplication;
 import org.matsim.run.scenarios.HannoverScenario;
 
-public class RunHannoverScenario {
+/**
+ *  * Run the {@link HannoverScenario} with default configuration.
+ */
+public final class RunHannoverScenario {
 	private RunHannoverScenario() {
 
 	}
