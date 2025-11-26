@@ -96,15 +96,30 @@
 			<version>${matsim.version}</version>
 			<scope>test</scope>
 		</dependency>
-		<dependency>
-			<groupId>org.jetbrains</groupId>
-			<artifactId>annotations</artifactId>
-			<version>13.0</version>
-			<scope>compile</scope>
-		</dependency>
+<!--		<dependency>-->
+<!--			<groupId>org.jetbrains</groupId>-->
+<!--			<artifactId>annotations</artifactId>-->
+<!--			<version>13.0</version>-->
+<!--			<scope>compile</scope>-->
+<!--		</dependency>-->
 
 	</dependencies>
+<!--	Without this section, different versions of the same dependency may be used in different modules, which can lead to conflicts.-->
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>org.postgresql</groupId>
+				<artifactId>postgresql</artifactId>
+				<version>42.7.7</version>
+			</dependency>
 
+			<dependency>
+				<groupId>org.jetbrains</groupId>
+				<artifactId>annotations</artifactId>
+				<version>26.0.2-1</version>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
 	<build>
 		<plugins>
 
