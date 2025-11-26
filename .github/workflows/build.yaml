@@ -64,7 +64,7 @@ jobs:
 
       - name: Test
         run: mvn --batch-mode --update-snapshots test -Dmatsim.preferLocalDtds=true -Dmaven.javadoc.skip -e
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: test-coverage
           path: target/site/jacoco/
@@ -88,7 +88,7 @@ jobs:
       - name: Package
         run: mvn --batch-mode --update-snapshots package -DskipTests -Dmatsim.preferLocalDtds=true -Dmaven.javadoc.skip -e
       - run: mkdir staging && cp *.jar staging
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: Package
           path: staging
