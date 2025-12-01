@@ -70,7 +70,7 @@ import static org.matsim.utils.HannoverUtils.*;
 
 public class HannoverScenario extends MATSimApplication {
 
-	static final String VERSION = "v1.0";
+	public static final String VERSION = "v1.0";
 
 	@CommandLine.Mixin
 	private final SampleOptions sample = new SampleOptions(100, 25, 10, 1);
