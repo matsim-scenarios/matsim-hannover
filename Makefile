@@ -18,7 +18,7 @@ hannover := $(CURDIR)/../../public-svn/matsim/scenarios/countries/de/hannover/ha
 
 MEMORY ?= 30G
 #JAR := matsim-$(N)-*.jar
-JAR := matsim-hannover-1.0-056c08f-dirty.jar
+JAR :=  matsim-hannover-1.0-fcf5fea-dirty.jar
 # snz data is from snz model 2025Q1. Thus, using germany map of similar time period.
 NETWORK := $(germany)/maps/germany-250127.osm.pbf
 
@@ -90,15 +90,14 @@ input/sumo.net.xml: ./input/network.osm
 # free-speed-factor 0.7 (standard is 0.9): see VSP WP 24-08 Figure 2. Hannover is most similar to metropolitan.
 #--remove-turn-restrictions used instead of new TurnRestrictionCleaner,
 # the cleaner needs more testing, as it destroys the bike network e.g.
-# TODO: talk to GR about freespeed factor/solutions to counts problem in RVR scenario.
-input/v1.0/dresden-v1.0-network5000.xml.gz: input/sumo.net.xml
+input/v1.0/hannover-v1.0-network.xml.gz: input/sumo.net.xml
 	echo input/$V/$N-$V-network.xml.gz
 	$(sc) prepare network-from-sumo $< --output $@ --free-speed-factor 0.7 --turn-restrictions IGNORE_TURN_RESTRICTIONS
-#	$(sc) prepare clean-network $@ --output $@ --modes car --modes bike --modes ride --remove-turn-restrictions
-##	delete truck as allowed mode (not used), add longDistanceFreight as allowed mode, prepare network for emissions analysis
-#	$(sc) prepare network\
-#	 --network $@\
-#	 --output $@
+	$(sc) prepare clean-network $@ --output $@ --modes car --modes bike --modes ride --remove-turn-restrictions
+#	delete truck as allowed mode (not used), add longDistanceFreight as allowed mode, prepare network for emissions analysis
+	$(sc) prepare network\
+	 --network $@\
+	 --output $@
 
 # gtfs data from oberlausitz-dresden shared-svn dir is used because it is from the same time period as the senozon model and osm data.
 input/v1.0/dresden-v1.0-network-with-pt.xml.gz: hannover-v1.0-network-prepared-cleaned.xml.gz
@@ -113,8 +112,8 @@ input/v1.0/dresden-v1.0-network-with-pt.xml.gz: hannover-v1.0-network-prepared-c
 	 --shp $(shared)/data/shp/network-area-utm32n.shp\
 	 --shp $(germany)/shp/germany-area.shp\
 
- # TODO count-link zuordnung prüfen: richtung + art des links
  # create matsim counts file
+ # count to link assignments have been checked manually, they look correct.
  input/v1.0/hannover-v1.0-counts-bast.xml.gz: input/$V/$N-$V-network-with-pt.xml.gz
 	$(sc) prepare counts-from-bast\
 		--network $<\
@@ -139,6 +138,50 @@ input/plans-longHaulFreight.xml.gz:
 	 --legMode "truck40t"\
 	 --subpopulation "longDistanceFreight"\
 	 --output $@
+
+# create facilities for commercial traffic
+# the following 2 steps are typically run on the math cluster by Ricardo Ewert. the steps are here for documentation.
+# the necessary small scale commercial traffic plans file is copied from the cluster into the local directory for further use.
+# on the cluster, the plans are located at:
+#input/v1.0/commercialFacilities.xml.gz:
+#	$(sc) prepare create-data-distribution-of-structure-data\
+#	 --outputFacilityFile $@\
+#	 --outputDataDistributionFile $(shared)/data/commercial_traffic/output/dataDistributionPerZone.csv\
+#	 --landuseConfiguration useOSMBuildingsAndLanduse\
+# 	 --regionsShapeFileName $(shared)/data/commercial_traffic/input/shp/hannover_regions_25832.shp\
+#	 --regionsShapeRegionColumn "GEN"\
+#	 --zoneShapeFileName $(shared)/data/commercial_traffic/input/shp/hannover_zones_25832.shp\
+#	 --zoneShapeFileNameColumn "zone"\
+#	 --buildingsShapeFileName $(shared)/data/commercial_traffic/input/shp/hannover_buildings_25832.shp\
+#	 --shapeFileBuildingTypeColumn "building"\
+#	 --landuseShapeFileName $(shared)/data/commercial_traffic/input/shp/hannover_landuse_25832.shp\
+#	 --shapeFileLanduseTypeColumn "landuse"\
+#	 --shapeCRS "EPSG:25832"\
+#	 --pathToInvestigationAreaData $(shared)/data/commercial_traffic/input/investigationAreaData.csv
+#
+## generate small scale commercial traffic
+#input/v1.0/hannover-small-scale-commercialTraffic-v1.0-100pct.xml.gz: input/$V/$N-$V-network.xml.gz input/$V/commercialFacilities.xml.gz
+#	$(sc) prepare generate-small-scale-commercial-traffic\
+#	  input/$V/$N-$V-100pct.config.xml\
+#	 --pathToDataDistributionToZones $(shared)/data/commercial_traffic/output/dataDistributionPerZone.csv\
+#	 --pathToCommercialFacilities $(word 2,$^)\
+#	 --sample 1.0\
+#	 --jspritIterations 100\
+#	 --additionalTravelBufferPerIterationInMinutes 60\
+#	 --creationOption "createNewCarrierFile"\
+#	 --network $<\
+#	 --smallScaleCommercialTrafficType "completeSmallScaleCommercialTraffic"\
+#	 --zoneShapeFileName $(shared)/data/commercial_traffic/input/shp/hannover_zones_25832.shp\
+#	 --zoneShapeFileNameColumn "zone"\
+#	 --shapeCRS "EPSG:25832"\
+#	 --resistanceFactor_commercialPersonTraffic 0.2\
+#	 --resistanceFactor_goodsTraffic 0.1\
+#	 --numberOfPlanVariantsPerAgent 5\
+#	 --nameOutputPopulation $@\
+#	 --pathOutput output/commercialPersonTraffic\
+#	 --MATSimIterationsAfterDemandGeneration 0
+#
+#	mv output/commercialPersonTraffic/$@ $@
 
 # trajectory-to-plans formerly was a collection of methods to prepare a given population
 # now, most of the functions of this class do have their own class (downsample, splitduration types...)
@@ -169,10 +212,19 @@ input/v1.0/prepare-100pct.plans.xml.gz:
 #	set car availability for agents below 18 to false, standardize some person attrs, set home coords, set person income
 	$(sc) prepare population $@ --output $@
 
-# TODO: here we might need an additional step: educ activities sollten auf echte Schulen gemappt sein
-# TODO: alte Agenten sollten auf Altersheime gemappt sein. stay home?!
+# TODO for next version: here we might need an additional step: educ activities sollten auf echte Schulen gemappt sein
+# TODO for next version: alte Agenten sollten auf Altersheime gemappt sein. stay home?!
 
-input/v1.0/prepare-100pct-with.trips-split-merged.plans.xml.gz: input/plans-longHaulFreight.xml.gz input/$V/prepare-100pct.plans.xml.gz
+# this step is necessary to process the plans for a 0it test. the 0it test is used to generate trips and persons tables
+# for the calculation of a number of short distance trips to add (compared to reference data).
+# the calculation is done in python script extract_ref_data.py
+input/v1.0/prepare-100pct-with-trips-split-merged.plans_FOR_0IT_TEST.xml.gz: input/v1.0/prepare-100pct.plans.xml.gz
+	$(sc) prepare split-activity-types-duration\
+		--input $<\
+		--exclude commercial_start,commercial_end,freight_start,freight_end,service\
+		--output $@
+
+input/v1.0/prepare-100pct-with.trips-split-merged.plans.xml.gz: input/plans-longHaulFreight.xml.gz input/$V/prepare-100pct.plans.xml.gz $(shared)/data/commercial_traffic/output/$N-small-scale-commercialTraffic-$V-100pct.xml.gz
 # generate some short distance trips, which in senozon data generally are missing
 # 1) we have to calculate the number of trips to add with python script create_ref.py
 # for that it might be necessary to run split-activity-types-duration (see below) separately.
@@ -190,28 +242,30 @@ input/v1.0/prepare-100pct-with.trips-split-merged.plans.xml.gz: input/plans-long
     --output $@
 #    this step *has to* be done after the generation of short distance trips.
 #	split activity types to type_duration for the scoring to take into account the typical duration
+# --overlong-plans-factor 1.5 is a workaround for v1.0 until we have scripts to validate and correct unplausibly long daily plans
 	$(sc) prepare split-activity-types-duration\
 		--input $@\
+		--overlong-plans-factor 1.5\
 		--exclude commercial_start,commercial_end,freight_start,freight_end,service\
 		--output $@
 #	merge person and freight pops
-	$(sc) prepare merge-populations $@ $< --output $@
+	$(sc) prepare merge-populations $@ $< $(word 3,$^) --output $@
 
-
+# there should be more detailed algorithms to create activity facilities than the below class. it creates one facility per activity coord.
+# see https://github.com/matsim-scenarios/matsim-hannover/issues/1
 input/v1.0/hannover-v1.0-100pct.plans-initial.xml.gz: input/$V/prepare-100pct-with.trips-split-merged.plans.xml.gz input/$V/$N-$V-network-with-pt.xml.gz
-#	I am not sure if this is a good idea.
-#	TODO: discuss with KN
 	$(sc) prepare facilities\
 		--input-population $<\
         --network $(word 2,$^)\
         --output-population $@\
         --output-facilities input/$V/$N-$V-activity-facilities.xml.gz
+    # we need to fix subtours again after assignment of facilities to activities.
+	$(sc) prepare fix-subtour-modes --coord-dist 100 --input $@ --output $@
 	$(sc) prepare downsample-population $@\
 		 --sample-size 1\
 		 --samples 0.25 0.1 0.01 0.001\
 
-# output of check-population was compared to initial output in matsim-oberlausitz-dresden scenario documentation, they align -sm0225
-#TODO: check output of below. see scenario doc
+# output of check-population was compared to senozon modellsteckbrief, they align -sm1225
 check: input/$V/$N-$V-100pct.plans-initial.xml.gz
 	$(sc) analysis check-population $<\
  	 --input-crs $(CRS)\
