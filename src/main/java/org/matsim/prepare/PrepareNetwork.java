@@ -49,7 +49,7 @@ public class PrepareNetwork implements MATSimAppCommand {
 	/**
 	 * prepare link attributes for freight and truck as allowed modes together with car.
 	 */
-	public void prepareFreightNetwork(Network network) {
+	public static void prepareFreightNetwork(Network network) {
 		int linkCount = 0;
 
 		for (Link link : network.getLinks().values()) {
