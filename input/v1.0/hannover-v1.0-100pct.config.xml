@@ -30,9 +30,15 @@
 		<param name="laneDefinitionsFile" value="null"/>
 	</module>
 
+	<module name="facilities" >
+		<param name="facilitiesSource" value="fromFile" />
+		<param name="inputCRS" value="EPSG:25832" />
+		<param name="inputFacilitiesFile" value="https://svn.vsp.tu-berlin.de/repos/public-svn/matsim/scenarios/countries/de/hannover/hannover-v1.0/input/hannover-v1.0-activity-facilities.xml.gz" />
+	</module>
+
 	<module name="plans">
 		<param name="inputPlansFile"
-			   value="https://svn.vsp.tu-berlin.de/repos/public-svn/matsim/scenarios/countries/de/hannover/hannover-v1.0/input/hannover-v1.0-100pct-calibrated-plans_selected_cleaned.xml.gz"/>
+			   value="https://svn.vsp.tu-berlin.de/repos/public-svn/matsim/scenarios/countries/de/hannover/hannover-v1.0/input/hannover-v1.0-100pct.plans-initial.xml.gz"/>
 		<param name="removingUnnecessaryPlanAttributes" value="true"/>
 	</module>
 
@@ -53,7 +59,7 @@
 	<module name="routing">
 		<!-- Some typical teleportation routing params are set by default, such as for walk and bike.  Setting this switch to "true" will clear them.  Note that this will also clear settings for helper modes such as for non_network_walk -->
 		<param name="clearDefaultTeleportedModeParams" value="true"/>
-		<param name="networkModes" value="car,ride,bike,truck8t,truck18t,truck40t"/>
+		<param name="networkModes" value="car,ride,bike"/>
 		<parameterset type="teleportedModeParameters">
 			<param name="beelineDistanceFactor" value="1.3"/>
 			<param name="mode" value="walk"/>
@@ -65,7 +71,7 @@
 		<param name="endTime" value="36:00:00"/>
 		<param name="flowCapacityFactor" value="1.0"/>
 		<param name="storageCapacityFactor" value="1.0"/>
-		<param name="mainMode" value="car,bike,truck8t,truck18t,truck40t"/>
+		<param name="mainMode" value="car,bike"/>
 		<param name="numberOfThreads" value="12"/>
 		<param name="startTime" value="00:00:00"/>
 		<param name="stuckTime" value="30.0"/>
@@ -80,32 +86,25 @@
 		<param name="insertingWaitingVehiclesBeforeDrivingVehicles" value="true"/>
 	</module>
 
-	<module name="simwrapper" >
-		<parameterset type="params" >
-			<param name="context" value="" />
-			<param name="mapCenter" value="14.5,51.53" />
-			<param name="mapZoomLevel" value="6.8" />
-			<param name="shp" value="../shp/network-area-utm32n.shp" />
-		</parameterset>
-	</module>
+<!--	set in code -->
+<!--	<module name="replanningAnnealer" >-->
+<!--		<param name="activateAnnealingModule" value="true" />-->
+<!--		<parameterset type="AnnealingVariable" >-->
+<!--			<param name="annealParameter" value="globalInnovationRate" />-->
+<!--&lt;!&ndash;			globalInnovationRate: fraction of innovated agents is annealed&ndash;&gt;-->
+<!--			<param name="annealType" value="sigmoid" />-->
+<!--&lt;!&ndash;			sigmoid: see comment above shapeFactor&ndash;&gt;-->
+<!--			<param name="subpopulation" value="person" />-->
+<!--			&lt;!&ndash; this parameter enters the exponential and sigmoid formulas. May be an iteration or a share, i.e. 0.5 for halfLife at 50% of iterations. Exponential: startValue / exp(it/halfLife) &ndash;&gt;-->
+<!--&lt;!&ndash;			the exponential entry can be ignored&ndash;&gt;-->
+<!--			<param name="halfLife" value="0.5" />-->
+<!--			&lt;!&ndash; sigmoid: 1/(1+e^(shapeFactor*(it - halfLife))); geometric: startValue * shapeFactor^it; msa: startValue / it^shapeFactor &ndash;&gt;-->
+<!--			<param name="shapeFactor" value="0.01" />-->
+<!--			<param name="startValue" value="0.45" />-->
+<!--			<param name="endValue" value="0.01" />-->
+<!--		</parameterset>-->
+<!--	</module>-->
 
-	<module name="replanningAnnealer" >
-		<param name="activateAnnealingModule" value="true" />
-		<parameterset type="AnnealingVariable" >
-			<param name="annealParameter" value="globalInnovationRate" />
-<!--			globalInnovationRate: fraction of innovated agents is annealed-->
-			<param name="annealType" value="sigmoid" />
-<!--			sigmoid: see comment above shapeFactor-->
-			<param name="subpopulation" value="person" />
-			<!-- this parameter enters the exponential and sigmoid formulas. May be an iteration or a share, i.e. 0.5 for halfLife at 50% of iterations. Exponential: startValue / exp(it/halfLife) -->
-<!--			the exponential entry can be ignored-->
-			<param name="halfLife" value="0.5" />
-			<!-- sigmoid: 1/(1+e^(shapeFactor*(it - halfLife))); geometric: startValue * shapeFactor^it; msa: startValue / it^shapeFactor -->
-			<param name="shapeFactor" value="0.01" />
-			<param name="startValue" value="0.45" />
-			<param name="endValue" value="0.01" />
-		</parameterset>
-	</module>
 	<module name="replanning">
 		<!--		this also switches off annealing-->
 		<param name="fractionOfIterationsToDisableInnovation" value="0.9"/>
@@ -129,46 +128,18 @@
 			<param name="subpopulation" value="person"/>
 			<param name="weight" value="0.10"/>
 		</parameterset>
-		<parameterset type="strategysettings">
-			<param name="strategyName" value="ChangeExpBeta"/>
-			<param name="subpopulation" value="goodsTraffic"/>
-			<param name="weight" value="0.95"/>
-		</parameterset>
-		<parameterset type="strategysettings">
-			<param name="strategyName" value="ReRoute"/>
-			<param name="subpopulation" value="goodsTraffic"/>
-			<param name="weight" value="0.05"/>
-		</parameterset>
-		<parameterset type="strategysettings">
-			<param name="strategyName" value="ChangeExpBeta"/>
-			<param name="subpopulation" value="commercialPersonTraffic"/>
-			<param name="weight" value="0.95"/>
-		</parameterset>
-		<parameterset type="strategysettings">
-			<param name="strategyName" value="ReRoute"/>
-			<param name="subpopulation" value="commercialPersonTraffic"/>
-			<param name="weight" value="0.05"/>
-		</parameterset>
-		<parameterset type="strategysettings">
-			<param name="strategyName" value="ChangeExpBeta"/>
-			<param name="subpopulation" value="commercialPersonTraffic_service"/>
-			<param name="weight" value="0.95"/>
-		</parameterset>
-		<parameterset type="strategysettings">
-			<param name="strategyName" value="ReRoute"/>
-			<param name="subpopulation" value="commercialPersonTraffic_service"/>
-			<param name="weight" value="0.05"/>
-		</parameterset>
-		<parameterset type="strategysettings">
-			<param name="strategyName" value="ChangeExpBeta"/>
-			<param name="subpopulation" value="longDistanceFreight"/>
-			<param name="weight" value="0.95"/>
-		</parameterset>
-		<parameterset type="strategysettings">
-			<param name="strategyName" value="ReRoute"/>
-			<param name="subpopulation" value="longDistanceFreight"/>
-			<param name="weight" value="0.05"/>
-		</parameterset>
+
+<!--		set in code -->
+<!--		<parameterset type="strategysettings">-->
+<!--			<param name="strategyName" value="ChangeExpBeta"/>-->
+<!--			<param name="subpopulation" value="longDistanceFreight"/>-->
+<!--			<param name="weight" value="0.95"/>-->
+<!--		</parameterset>-->
+<!--		<parameterset type="strategysettings">-->
+<!--			<param name="strategyName" value="ReRoute"/>-->
+<!--			<param name="subpopulation" value="longDistanceFreight"/>-->
+<!--			<param name="weight" value="0.05"/>-->
+<!--		</parameterset>-->
 	</module>
 
 	<module name="subtourModeChoice">
@@ -193,7 +164,7 @@
 		<!-- This parameter decides which modes are analyzed, when separateModes = false && filterModes = true. The 2 latter parameters are only here for backwards compability.
 		standard is separateModes = true (see below), so analyzedModes is ignored.
 		In case of separateModes = false && filterModes = true: travel time measurement for all vehicle types together (seperatemodes = false), BUT filtered (filterModes = true) for the modes in analyzedModes-->
-		<param name="analyzedModes" value="car,truck8t,truck18t,truck40t"/>
+		<param name="analyzedModes" value="car"/>
 
 		<param name="separateModes" value="true"/>
 		<param name="calculateLinkToLinkTravelTimes" value="false"/>
@@ -238,22 +209,6 @@
 				<param name="marginalUtilityOfTraveling_util_hr" value="0.0"/>
 				<param name="mode" value="walk"/>
 			</parameterset>
-			<parameterset type="modeParams">
-				<param name="marginalUtilityOfTraveling_util_hr" value="-10.0"/>
-				<param name="mode" value="truck8t"/>
-				<param name="monetaryDistanceRate" value="-0.002"/>
-			</parameterset>
-			<parameterset type="modeParams">
-				<param name="marginalUtilityOfTraveling_util_hr" value="-10.0"/>
-				<param name="mode" value="truck18t"/>
-				<param name="monetaryDistanceRate" value="-0.002"/>
-			</parameterset>
-			<parameterset type="modeParams">
-				<param name="marginalUtilityOfTraveling_util_hr" value="-10.0"/>
-				<param name="mode" value="truck40t"/>
-				<param name="monetaryDistanceRate" value="-0.002"/>
-			</parameterset>
-
 		</parameterset>
 	</module>
 
