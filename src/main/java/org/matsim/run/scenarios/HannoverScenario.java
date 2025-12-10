@@ -79,7 +79,7 @@ public class HannoverScenario extends MATSimApplication {
 	@CommandLine.Option(names = "--explicit-walk-intermodality", defaultValue = "ENABLED", description = "Define if explicit walk intermodality parameter to/from pt should be set or not (use default).")
 	static HannoverUtils.FunctionalityHandling explicitWalkIntermodality;
 	@CommandLine.Option(names = "--ride-alpha", defaultValue = "2.0", description = "Alpha value for ride. It is multiplied (+1) with the distance and tt based utilities and cost for car.")
-	Double rideAlpha;
+	private double rideAlpha;
 
 	public HannoverScenario(@Nullable Config config) {
 		super(config);
