@@ -243,6 +243,7 @@ input/v1.0/prepare-100pct-with.trips-split-merged.plans.xml.gz: input/plans-long
 #    this step *has to* be done after the generation of short distance trips.
 #	split activity types to type_duration for the scoring to take into account the typical duration
 # --overlong-plans-factor 1.5 is a workaround for v1.0 until we have scripts to validate and correct unplausibly long daily plans
+#	TODO: usage of --end-time-to-duration does not remove all end times of activities below 1800s (default value)
 	$(sc) prepare split-activity-types-duration\
 		--input $@\
 		--overlong-plans-factor 1.5\
