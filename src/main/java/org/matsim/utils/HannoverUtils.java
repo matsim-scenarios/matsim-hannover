@@ -161,7 +161,17 @@ public final class HannoverUtils {
 	}
 
 	/**
-	 * Helper enum to enable/disable functionalities.
+	 * Switch on/off automatic analysis on air pollution emissions and creation of air pollution dashboard.
 	 */
-	public enum FunctionalityHandling {ENABLED, DISABLED}
+	public enum EmissionsAnalysisHandling {RUN_EMISSIONS_ANALYSIS, NO_EMISSIONS_ANALYSIS}
+
+	/**
+	 * Switch on/off analysis on noise emissions and creation of noise dashboard.
+	 */
+	public enum NoiseAnalysisHandling {RUN_NOISE_ANALYSIS, NO_NOISE_ANALYSIS}
+
+	/**
+	 * Switch on/off analysis on trips and creation of trips dashboard.
+	 */
+	public enum TripsAnalysisHandling {RUN_TRIPS_ANALYSIS, NO_TRIPS_ANALYSIS}
 }

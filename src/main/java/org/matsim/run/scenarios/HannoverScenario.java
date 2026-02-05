@@ -47,7 +47,6 @@ import org.matsim.simwrapper.SimWrapperConfigGroup;
 import org.matsim.simwrapper.SimWrapperModule;
 import org.matsim.smallScaleCommercialTrafficGeneration.GenerateSmallScaleCommercialTrafficDemand;
 import org.matsim.smallScaleCommercialTrafficGeneration.prepare.CreateDataDistributionOfStructureData;
-import org.matsim.utils.HannoverUtils;
 import picocli.CommandLine;
 import playground.vsp.scoring.IncomeDependentUtilityOfMoneyPersonScoringParameters;
 
@@ -74,10 +73,8 @@ public class HannoverScenario extends MATSimApplication {
 
 	@CommandLine.Mixin
 	private final SampleOptions sample = new SampleOptions(100, 25, 10, 1);
-	@CommandLine.Option(names = "--emissions", defaultValue = "ENABLED", description = "Define if emission analysis should be performed or not.")
-	HannoverUtils.FunctionalityHandling emissions;
-	@CommandLine.Option(names = "--explicit-walk-intermodality", defaultValue = "ENABLED", description = "Define if explicit walk intermodality parameter to/from pt should be set or not (use default).")
-	static HannoverUtils.FunctionalityHandling explicitWalkIntermodality;
+	@CommandLine.Option(names = "--emissions", defaultValue = "RUN_EMISSIONS_ANALYSIS", description = "Define if emission analysis should be performed or not. Options: RUN_EMISSIONS_ANALYSIS, NO_EMISSIONS_ANALYSIS")
+	EmissionsAnalysisHandling emissions;
 	@CommandLine.Option(names = "--ride-alpha", defaultValue = "1.0", description = "Alpha value for ride. It is multiplied (+1) with the distance and tt based utilities and cost for car.")
 	private double rideAlpha;
 
@@ -205,11 +202,9 @@ public class HannoverScenario extends MATSimApplication {
 		ptFareConfigGroup.addParameterSet(tarifzoneA);
 		ptFareConfigGroup.addParameterSet(germany);
 
-		if (explicitWalkIntermodality == HannoverUtils.FunctionalityHandling.ENABLED) {
-			setExplicitIntermodalityParamsForWalkToPt(ConfigUtils.addOrGetModule(config, SwissRailRaptorConfigGroup.class));
-		}
+		setExplicitIntermodalityParamsForWalkToPt(ConfigUtils.addOrGetModule(config, SwissRailRaptorConfigGroup.class));
 
-		if (emissions == HannoverUtils.FunctionalityHandling.ENABLED) {
+		if (emissions == EmissionsAnalysisHandling.RUN_EMISSIONS_ANALYSIS) {
 //		set hbefa input files for emission analysis
 			setEmissionsConfigs(config);
 		}
@@ -233,7 +228,7 @@ public class HannoverScenario extends MATSimApplication {
 			}
 		}
 
-		if (emissions == FunctionalityHandling.ENABLED) {
+		if (emissions == EmissionsAnalysisHandling.RUN_EMISSIONS_ANALYSIS) {
 //			prepare hbefa link attributes + make link.getType() handable for OsmHbefaMapping
 //			this also happens in makefile pipeline. integrating it here for same reason as above.
 			PrepareNetwork.prepareEmissionsAttributes(scenario.getNetwork());
