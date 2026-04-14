@@ -61,11 +61,11 @@ public final class HannoverSimWrapperRunner implements MATSimAppCommand {
 	private List<Path> inputPaths;
 	@CommandLine.Mixin
 	private final ShpOptions shp = new ShpOptions();
-	@CommandLine.Option(names = "--noise", defaultValue = "RUN_NOISE_ANALYSIS", description = "create noise dashboard")
+	@CommandLine.Option(names = "--noise", defaultValue = "NO_NOISE_ANALYSIS", description = "create noise dashboard")
 	private HannoverUtils.NoiseAnalysisHandling noise;
-	@CommandLine.Option(names = "--trips", defaultValue = "RUN_TRIPS_ANALYSIS", description = "create trips dashboard")
+	@CommandLine.Option(names = "--trips", defaultValue = "NO_TRIPS_ANALYSIS", description = "create trips dashboard")
 	private HannoverUtils.TripsAnalysisHandling trips;
-	@CommandLine.Option(names = "--emissions", defaultValue = "RUN_EMISSIONS_ANALYSIS", description = "create emission dashboard. Options: RUN_EMISSIONS_ANALYSIS, NO_EMISSIONS_ANALYSIS")
+	@CommandLine.Option(names = "--emissions", defaultValue = "NO_EMISSIONS_ANALYSIS", description = "create emission dashboard. Options: RUN_EMISSIONS_ANALYSIS, NO_EMISSIONS_ANALYSIS")
 	HannoverUtils.EmissionsAnalysisHandling emissions;
 
 
