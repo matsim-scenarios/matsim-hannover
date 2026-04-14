@@ -34,6 +34,10 @@ public final class HannoverUtils {
 	public static final String HBEFA_FILE_WARM_AVERAGE = HBEFA_2020_PATH + "7eff8f308633df1b8ac4d06d05180dd0c5fdf577.enc";
 	private static final String AVERAGE = "average";
 
+	public static final String BEFORE = "_before_emissions.xml";
+	public static final String AFTER = "_after_emissions.xml";
+	public static final String XML = ".xml";
+
 	private HannoverUtils() {
 
 	}
