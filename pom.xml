@@ -9,7 +9,7 @@
 		<!--<version>2026.0-2025w48</version>-->
 
 		<!-- PR-labelled release -->
-		<version>2026.0-PR4528</version>
+		<version>2027.0-PR4967</version>
 		<!-- snapshot == not recommended: rather use PR-labelled release!-->
 		<!--		<version>2026.0-SNAPSHOT</version>-->
 	</parent>
@@ -118,7 +118,7 @@
 			<dependency>
 				<groupId>org.jetbrains</groupId>
 				<artifactId>annotations</artifactId>
-				<version>26.0.2-1</version>
+				<version>26.1.0</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>

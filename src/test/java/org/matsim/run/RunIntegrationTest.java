@@ -19,7 +19,7 @@ public class RunIntegrationTest {
 	@Test
 	void runScenario() {
 		Config config = ConfigUtils.loadConfig(String.format("input/%s/hannover-%s-10pct.config.xml", HannoverScenario.VERSION, HannoverScenario.VERSION));
-		ConfigUtils.addOrGetModule(config, SimWrapperConfigGroup.class).setDefaultDashboards(SimWrapperConfigGroup.Mode.disabled);
+		ConfigUtils.addOrGetModule(config, SimWrapperConfigGroup.class).setDefaultDashboards(SimWrapperConfigGroup.DefaultDashboardsMode.disabled);
 
 		assert MATSimApplication.execute(HannoverScenario.class, config,
 			"--1pct",

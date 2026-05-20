@@ -19,11 +19,11 @@ import org.matsim.application.prepare.network.CleanNetwork;
 import org.matsim.application.prepare.network.CreateNetworkFromSumo;
 import org.matsim.application.prepare.population.*;
 import org.matsim.application.prepare.pt.CreateTransitScheduleFromGtfs;
+import org.matsim.contrib.common.conventions.vsp.SnzActivities;
 import org.matsim.contrib.vsp.pt.fare.DistanceBasedPtFareParams;
 import org.matsim.contrib.vsp.pt.fare.FareZoneBasedPtFareParams;
 import org.matsim.contrib.vsp.pt.fare.PtFareConfigGroup;
 import org.matsim.contrib.vsp.pt.fare.PtFareModule;
-import org.matsim.contrib.vsp.scenario.SnzActivities;
 import org.matsim.contrib.vsp.scoring.RideScoringParamsFromCarParams;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
@@ -83,7 +83,7 @@ public class HannoverScenario extends MATSimApplication {
 	}
 
 	public HannoverScenario() {
-		super(String.format("input/%s/hannover-%s-10pct.config.xml", VERSION, VERSION));
+		super(ConfigUtils.loadConfig(String.format("input/%s/hannover-%s-10pct.config.xml", VERSION, VERSION)));
 	}
 
 	public static void main(String[] args) {
