@@ -3,6 +3,7 @@ package org.matsim.utils;
 import ch.sbb.matsim.config.SwissRailRaptorConfigGroup;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.TransportMode;
+import org.matsim.contrib.emissions.HbefaTechnology;
 import org.matsim.contrib.emissions.HbefaVehicleCategory;
 import org.matsim.contrib.emissions.utils.EmissionsConfigGroup;
 import org.matsim.core.config.Config;
@@ -125,6 +126,11 @@ public final class HannoverUtils {
 					}
 					default -> throw new IllegalArgumentException("does not know how to handle vehicleType " + type.getId().toString());
 				}
+			}
+
+			if (VehicleUtils.getHbefaTechnology(engineInformation).equals("petrol")) {
+//				some veh types use technology "petrol" which does not exist. it either is petrol (4S) or petrol (2S). going for 4S here
+				VehicleUtils.setHbefaTechnology(engineInformation, HbefaTechnology.PETROL_4S.id);
 			}
 		}
 
