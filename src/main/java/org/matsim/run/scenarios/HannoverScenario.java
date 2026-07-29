@@ -27,10 +27,7 @@ import org.matsim.contrib.vsp.pt.fare.PtFareModule;
 import org.matsim.contrib.vsp.scoring.RideScoringParamsFromCarParams;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
-import org.matsim.core.config.groups.ReplanningConfigGroup;
-import org.matsim.core.config.groups.RoutingConfigGroup;
-import org.matsim.core.config.groups.ScoringConfigGroup;
-import org.matsim.core.config.groups.VspExperimentalConfigGroup;
+import org.matsim.core.config.groups.*;
 import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.network.NetworkUtils;
@@ -136,6 +133,12 @@ public class HannoverScenario extends MATSimApplication {
 		scoringConfigGroup.setPerforming_utils_hr(performing);
 		scoringConfigGroup.setWriteExperiencedPlans(true);
 		scoringConfigGroup.setPathSizeLogitBeta(0.);
+//		write score explanations into person attrs for each person
+		config.scoring().setExplainScores(true);
+
+//		also enable plan inheritance analysis
+		PlanInheritanceConfigGroup planInheritanceConfigGroup = ConfigUtils.addOrGetModule(config, PlanInheritanceConfigGroup.class);
+		planInheritanceConfigGroup.setEnabled(true);
 
 //		prepare config for usage of longDistanceFreight and small scale commercial traffic
 		prepareCommercialTrafficConfig(config);
