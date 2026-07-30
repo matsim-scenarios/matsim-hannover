@@ -9,7 +9,7 @@
 		<!--<version>2026.0-2025w48</version>-->
 
 		<!-- PR-labelled release -->
-		<version>2027.0-PR4967</version>
+		<version>2027.0-PR5088</version>
 		<!-- snapshot == not recommended: rather use PR-labelled release!-->
 		<!--		<version>2026.0-SNAPSHOT</version>-->
 	</parent>
