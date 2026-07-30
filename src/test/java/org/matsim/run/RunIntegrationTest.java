@@ -29,7 +29,7 @@ public class RunIntegrationTest {
 			"--config:controller.overwriteFiles=deleteDirectoryIfExists",
 			"--config:global.numberOfThreads", "2",
 			"--config:qsim.numberOfThreads", "2",
-			"--emissions", "DISABLED")
+			"--emissions", "NO_EMISSIONS_ANALYSIS")
 			== 0 : "Must return non error code";
 
 		Assertions.assertTrue(new File(utils.getOutputDirectory()).isDirectory());

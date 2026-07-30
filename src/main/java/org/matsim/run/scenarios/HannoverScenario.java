@@ -110,7 +110,7 @@ public class HannoverScenario extends MATSimApplication {
 
 			config.qsim().setFlowCapFactor(sample.getSample());
 			config.qsim().setStorageCapFactor(sample.getSample());
-			config.counts().setCountsScaleFactor(sample.getSample());
+			config.counts().setCountsScaleFactor(sample.getUpscaleFactor());
 			simWrapper.setSampleSize(sample.getSample());
 		}
 
