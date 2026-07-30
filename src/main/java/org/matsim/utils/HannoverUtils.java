@@ -1,6 +1,8 @@
 package org.matsim.utils;
 
 import ch.sbb.matsim.config.SwissRailRaptorConfigGroup;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.TransportMode;
 import org.matsim.contrib.emissions.HbefaTechnology;
@@ -18,6 +20,8 @@ import java.util.Set;
  * Utils class for Hannover scenario.
  */
 public final class HannoverUtils {
+	private static final Logger log = LogManager.getLogger(HannoverUtils.class);
+
 	private static final String HEAVY_MODE = "truck40t";
 	private static final String MEDIUM_MODE = "truck18t";
 	private static final String LIGHT_MODE = "truck8t";
@@ -79,6 +83,7 @@ public final class HannoverUtils {
 		eConfig.setAverageWarmEmissionFactorsFile(HBEFA_FILE_WARM_AVERAGE);
 		eConfig.setHbefaTableConsistencyCheckingLevel(EmissionsConfigGroup.HbefaTableConsistencyCheckingLevel.consistent);
 		eConfig.setDetailedVsAverageLookupBehavior(EmissionsConfigGroup.DetailedVsAverageLookupBehavior.tryDetailedThenTechnologyAverageThenAverageTable);
+		eConfig.setEmissionsComputationMethod(EmissionsConfigGroup.EmissionsComputationMethod.StopAndGoFraction);
 	}
 
 	/**
@@ -94,7 +99,7 @@ public final class HannoverUtils {
 					case TransportMode.car -> {
 						VehicleUtils.setHbefaVehicleCategory(engineInformation, HbefaVehicleCategory.PASSENGER_CAR.toString());
 //						based on car registrations in germany 2023: 30% petrol, 17% diesel, 30% Hybrid, 18% battery. Thus, average is the choice here.
-						VehicleUtils.setHbefaTechnology(engineInformation, AVERAGE);
+						VehicleUtils.setHbefaTechnology(engineInformation, HbefaTechnology.PETROL_4S.id);
 						VehicleUtils.setHbefaSizeClass(engineInformation, AVERAGE);
 						VehicleUtils.setHbefaEmissionsConcept(engineInformation, AVERAGE);
 					}
@@ -114,13 +119,13 @@ public final class HannoverUtils {
 					}
 					case LIGHT_MODE -> {
 						VehicleUtils.setHbefaVehicleCategory(engineInformation, HbefaVehicleCategory.LIGHT_COMMERCIAL_VEHICLE.toString());
-						VehicleUtils.setHbefaTechnology(engineInformation, "diesel");
+						VehicleUtils.setHbefaTechnology(engineInformation, HbefaTechnology.DIESEL.id);
 						VehicleUtils.setHbefaSizeClass(engineInformation, AVERAGE);
 						VehicleUtils.setHbefaEmissionsConcept(engineInformation, AVERAGE);
 					}
 					case MEDIUM_MODE, HEAVY_MODE -> {
 						VehicleUtils.setHbefaVehicleCategory(engineInformation, HbefaVehicleCategory.HEAVY_GOODS_VEHICLE.toString());
-						VehicleUtils.setHbefaTechnology(engineInformation, "diesel");
+						VehicleUtils.setHbefaTechnology(engineInformation, HbefaTechnology.DIESEL.id);
 						VehicleUtils.setHbefaSizeClass(engineInformation, AVERAGE);
 						VehicleUtils.setHbefaEmissionsConcept(engineInformation, AVERAGE);
 					}
@@ -131,6 +136,8 @@ public final class HannoverUtils {
 			if (VehicleUtils.getHbefaTechnology(engineInformation).equals("petrol")) {
 //				some veh types use technology "petrol" which does not exist. it either is petrol (4S) or petrol (2S). going for 4S here
 				VehicleUtils.setHbefaTechnology(engineInformation, HbefaTechnology.PETROL_4S.id);
+				log.warn("For vehicle type {} HbefaTechnology was set to 'petrol'. This is not a possible value. It was changed to {}." +
+					"Please check class HbefaTechnology for possibles values.", type.getId(), HbefaTechnology.PETROL_4S.id);
 			}
 		}
 
